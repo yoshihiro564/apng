@@ -1,0 +1,833 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"></head><body><title>APNGスタンプ工房</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Hachi+Maru+Pop&family=Klee+One:wght@600&family=M+PLUS+Rounded+1c:wght@500;800&family=Mochiy+Pop+One&family=Yomogi&family=Zen+Maru+Gothic:wght@900&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: 3-column workbench — stamp sheet | stage | inspector. Stacks on phones. */
+:root{
+  --bg:#eef1f4; --panel:#ffffff; --ink:#1d2430; --sub:#5d6878; --line:#d5dbe3;
+  --accent:#e2533b; --accent-ink:#ffffff; --accent-soft:#fde6e1;
+  --ok:#1f8a5b; --ok-soft:#dcf3e8; --warn:#b4560b; --warn-soft:#fdebd6; --bad:#c2312a; --bad-soft:#fbe0de;
+  --check-a:#ffffff; --check-b:#e3e7ec;
+  --f-disp:"Mochiy Pop One","M PLUS Rounded 1c",system-ui,sans-serif;
+  --f-body:"M PLUS Rounded 1c","Hiragino Maru Gothic ProN",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#151a21; --panel:#1e252e; --ink:#e8edf3; --sub:#9aa6b5; --line:#323c48;
+  --accent:#ff6f57; --accent-ink:#1a0f0c; --accent-soft:#3a2420;
+  --ok:#4cc58c; --ok-soft:#173327; --warn:#f0a050; --warn-soft:#3a2a17; --bad:#ff7a70; --bad-soft:#3d1f1d;
+  --check-a:#2a323c; --check-b:#232a33; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#151a21; --panel:#1e252e; --ink:#e8edf3; --sub:#9aa6b5; --line:#323c48;
+  --accent:#ff6f57; --accent-ink:#1a0f0c; --accent-soft:#3a2420;
+  --ok:#4cc58c; --ok-soft:#173327; --warn:#f0a050; --warn-soft:#3a2a17; --bad:#ff7a70; --bad-soft:#3d1f1d;
+  --check-a:#2a323c; --check-b:#232a33; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.55;padding-inline:16px;padding-block:14px 40px}
+.wrap{max-width:1320px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+header{display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px}
+h1{font-family:var(--f-disp);font-weight:400;font-size:1.65rem;margin:0;letter-spacing:.02em;line-height:1.2}
+h1 small{display:block;font-family:var(--f-body);font-size:.78rem;color:var(--sub);letter-spacing:0;font-weight:500}
+.hdr-actions{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+button,.btn{font:inherit;font-weight:800;border-radius:10px;border:1.5px solid var(--line);background:var(--panel);color:var(--ink);padding:8px 14px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;line-height:1.2}
+button:hover,.btn:hover{border-color:var(--sub)}
+button:focus-visible,.btn:focus-within,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button.primary,.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+button.primary:hover{filter:brightness(1.06)}
+button:disabled{opacity:.45;cursor:not-allowed}
+button.small{padding:5px 10px;font-size:.8rem;border-radius:8px}
+.btn input{display:none}
+.grid{display:grid;grid-template-columns:270px minmax(0,1fr) 360px;gap:14px;align-items:start}
+@media (max-width:1100px){.grid{grid-template-columns:minmax(0,1fr) 340px}.sheet{grid-column:1 / -1}}
+@media (max-width:760px){.grid{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;min-width:0}
+.panel h2{font-size:.78rem;letter-spacing:.08em;color:var(--sub);margin:0 0 10px;font-weight:800;display:flex;align-items:center;gap:8px}
+.panel h2 .pill{margin-left:auto}
+.pill{font-family:var(--f-mono);font-size:.72rem;padding:2px 8px;border-radius:99px;background:var(--bg);color:var(--sub);white-space:nowrap;letter-spacing:0}
+.pill.ok{background:var(--ok-soft);color:var(--ok)} .pill.warn{background:var(--warn-soft);color:var(--warn)} .pill.bad{background:var(--bad-soft);color:var(--bad)}
+/* stamp sheet */
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:8px}
+.tile{position:relative;border:1.5px solid var(--line);border-radius:10px;background:var(--panel);padding:2px;cursor:pointer;aspect-ratio:32/27;display:flex;align-items:center;justify-content:center}
+.tile canvas{width:100%;height:auto;display:block}
+.tile.sel{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft)}
+.tile .no{position:absolute;left:4px;top:2px;font:500 .62rem var(--f-mono);color:var(--sub)}
+.tile .star{position:absolute;right:4px;top:0;font-size:.75rem;color:var(--accent)}
+.tile.add{border-style:dashed;color:var(--sub);font-weight:800;font-size:.75rem;text-align:center;flex-direction:column;gap:2px}
+.tile.add b{font-size:1.4rem;line-height:1}
+.sheet-foot{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.hint{font-size:.76rem;color:var(--sub);margin:8px 0 0}
+/* stage */
+.stage-box{display:flex;flex-direction:column;align-items:center;gap:12px}
+.stage{border-radius:12px;border:1px solid var(--line);overflow:hidden;width:100%;max-width:520px;aspect-ratio:32/27;position:relative}
+.stage canvas{width:100%;height:100%;display:block}
+.stage.bg-check{background-color:var(--check-a);background-image:linear-gradient(45deg,var(--check-b) 25%,transparent 25%,transparent 75%,var(--check-b) 75%),linear-gradient(45deg,var(--check-b) 25%,transparent 25%,transparent 75%,var(--check-b) 75%);background-size:20px 20px;background-position:0 0,10px 10px}
+.stage.bg-white{background:#ffffff} .stage.bg-talk{background:#7f9cc4} .stage.bg-dark{background:#22262c}
+.stage .guide{position:absolute;inset:3.7%;border:1px dashed rgba(226,83,59,.55);pointer-events:none;border-radius:4px}
+.stage-tools{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;align-items:center;width:100%;max-width:520px}
+.seg{display:inline-flex;border:1.5px solid var(--line);border-radius:10px;overflow:hidden}
+.seg button{border:0;border-radius:0;padding:6px 10px;font-size:.78rem;font-weight:800}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--panel)}
+.timeline{display:flex;gap:3px;width:100%;max-width:520px}
+.timeline i{flex:1;height:6px;border-radius:3px;background:var(--line)}
+.timeline i.on{background:var(--accent)}
+.specline{font-family:var(--f-mono);font-size:.78rem;color:var(--sub);text-align:center}
+.export-row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;align-items:center}
+.msg{font-size:.8rem;min-height:1.3em;text-align:center}
+.msg.bad{color:var(--bad)} .msg.ok{color:var(--ok)}
+/* inspector */
+.sec{border-top:1px solid var(--line);padding-top:12px;margin-top:12px}
+.sec:first-of-type{border-top:0;padding-top:0;margin-top:0}
+.sec h3{font-size:.86rem;margin:0 0 8px;font-weight:800;display:flex;align-items:center;gap:8px}
+.chips{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:6px}
+.chip{font-size:.78rem;padding:6px 6px;border-radius:9px;justify-content:center;text-align:center;flex-direction:column;gap:0;font-weight:800}
+.chip span{font-weight:500;font-size:.66rem;color:var(--sub)}
+.chip[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--ink)}
+.row{display:grid;grid-template-columns:5.6em minmax(0,1fr) 3.4em;align-items:center;gap:8px;margin:6px 0;font-size:.8rem}
+.row output{font-family:var(--f-mono);font-size:.74rem;color:var(--sub);text-align:right}
+.row.two{grid-template-columns:5.6em minmax(0,1fr)}
+input[type=range]{width:100%;accent-color:var(--accent)}
+input[type=text],select{font:inherit;font-size:.86rem;width:100%;padding:7px 9px;border-radius:9px;border:1.5px solid var(--line);background:var(--panel);color:var(--ink);min-width:0}
+input[type=color]{width:100%;height:32px;border:1.5px solid var(--line);border-radius:9px;background:var(--panel);padding:2px}
+.check{display:flex;align-items:center;gap:8px;font-size:.82rem;margin:6px 0;cursor:pointer}
+.check input{accent-color:var(--accent);width:16px;height:16px}
+.inline{display:flex;gap:6px;flex-wrap:wrap}
+.colors{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.colors label{font-size:.74rem;color:var(--sub);display:flex;flex-direction:column;gap:3px}
+details.spec{font-size:.8rem;color:var(--sub)}
+details.spec summary{cursor:pointer;font-weight:800;color:var(--ink)}
+.spec-table{width:100%;border-collapse:collapse;margin-top:8px;font-size:.78rem}
+.spec-table td{border-top:1px solid var(--line);padding:5px 6px;vertical-align:top}
+.spec-table td:first-child{white-space:nowrap;color:var(--ink);font-weight:800;width:8.5em}
+.sample-note{font-size:.72rem;background:var(--warn-soft);color:var(--warn);border-radius:8px;padding:6px 10px}
+.progress{width:100%;max-width:520px;height:4px;background:var(--line);border-radius:2px;overflow:hidden}
+.progress i{display:block;height:100%;width:0;background:var(--accent);transition:width .1s}
+@media (prefers-reduced-motion: reduce){.progress i{transition:none}}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>APNGスタンプ工房<small>素材PNGに動きと文字をつけて、LINEアニメーションスタンプ規格のAPNGに書き出します</small></h1>
+    <div class="hdr-actions">
+      <label class="btn" for="fileIn">＋ 素材PNGを追加<input id="fileIn" type="file" accept="image/png,image/webp,image/jpeg,image/gif" multiple></label>
+      <button class="primary" id="zipBtn" type="button">申請用ZIPを一括保存</button>
+    </div>
+  </header>
+
+  <div class="grid">
+    <!-- stamp sheet -->
+    <section class="panel sheet" aria-label="スタンプ一覧">
+      <h2>スタンプ一覧 <span class="pill" id="countPill">0 / 8</span></h2>
+      <div class="tiles" id="tiles"></div>
+      <div class="sheet-foot">
+        <button class="small" id="mainBtn" type="button">★ メイン画像にする</button>
+        <button class="small" id="dupBtn" type="button">複製</button>
+        <button class="small" id="delBtn" type="button">削除</button>
+      </div>
+      <div class="sheet-foot">
+        <button class="small" id="applyAllBtn" type="button">動き・再生設定を全部に適用</button>
+        <button class="small" id="omakaseBtn" type="button">動きをおまかせ割り振り</button>
+      </div>
+      <p class="hint" id="sampleNote">いま並んでいるのは動作確認用のサンプルです。素材PNGを追加すると、サンプルは自動で外れます。</p>
+      <p class="hint">複数のPNGをまとめて選ぶと、1枚ずつスタンプになります。タイルを押して1つずつ調整できます。</p>
+    </section>
+
+    <!-- stage -->
+    <section class="panel" aria-label="プレビュー">
+      <h2>プレビュー <span class="pill" id="sizePill">容量 未計測</span></h2>
+      <div class="stage-box">
+        <div class="stage bg-check" id="stage"><canvas id="stageCv" width="640" height="540"></canvas><div class="guide" id="guide"></div></div>
+        <div class="timeline" id="timeline"></div>
+        <div class="stage-tools">
+          <div class="seg" role="group" aria-label="背景">
+            <button type="button" data-bg="check" aria-pressed="true">透過</button>
+            <button type="button" data-bg="white" aria-pressed="false">白</button>
+            <button type="button" data-bg="talk" aria-pressed="false">トーク</button>
+            <button type="button" data-bg="dark" aria-pressed="false">黒</button>
+          </div>
+          <label class="check"><input type="checkbox" id="guideChk" checked>余白ガイド</label>
+          <button class="small" id="playBtn" type="button">一時停止</button>
+        </div>
+        <div class="specline" id="specLine"></div>
+        <div class="export-row">
+          <button class="primary" id="saveOneBtn" type="button">このスタンプをAPNG保存</button>
+          <button id="checkBtn" type="button">容量チェック</button>
+        </div>
+        <div class="progress" hidden id="prog"><i></i></div>
+        <div class="msg" id="msg" role="status"></div>
+      </div>
+    </section>
+
+    <!-- inspector -->
+    <section class="panel" aria-label="設定">
+      <div class="sec">
+        <h3>動き</h3>
+        <div class="chips" id="motionChips"></div>
+        <div class="row"><span>強さ</span><input type="range" id="strength" min="0.2" max="1.8" step="0.1"><output id="strengthO"></output></div>
+        <div class="row"><span>くり返し</span><input type="range" id="cycles" min="1" max="4" step="1"><output id="cyclesO"></output></div>
+        <label class="check"><input type="checkbox" id="boil">手描き風に線をゆらす（ぬるぬる感）</label>
+      </div>
+
+      <div class="sec">
+        <h3>文字</h3>
+        <div class="row two"><span>文字</span><input type="text" id="text" maxlength="16" placeholder="例：おはよ〜"></div>
+        <div class="row two"><span>書体</span><select id="font"></select></div>
+        <div class="row two"><span>位置</span>
+          <div class="seg" role="group" aria-label="文字の位置" id="posSeg">
+            <button type="button" data-pos="top">上</button><button type="button" data-pos="bottom">下</button><button type="button" data-pos="over">重ねる</button>
+          </div></div>
+        <div class="row"><span>大きさ</span><input type="range" id="fontSize" min="22" max="72" step="1"><output id="fontSizeO"></output></div>
+        <div class="row two"><span>文字の動き</span><select id="textAnim"></select></div>
+        <div class="colors">
+          <label>文字色<input type="color" id="fill"></label>
+          <label>フチ色<input type="color" id="stroke"></label>
+        </div>
+        <div class="row"><span>フチ太さ</span><input type="range" id="strokeW" min="0" max="12" step="1"><output id="strokeWO"></output></div>
+      </div>
+
+      <div class="sec">
+        <h3>素材の配置</h3>
+        <div class="row"><span>大きさ</span><input type="range" id="scale" min="0.4" max="1.4" step="0.02"><output id="scaleO"></output></div>
+        <div class="row"><span>左右</span><input type="range" id="offX" min="-80" max="80" step="1"><output id="offXO"></output></div>
+        <div class="row"><span>上下</span><input type="range" id="offY" min="-80" max="80" step="1"><output id="offYO"></output></div>
+        <label class="check"><input type="checkbox" id="mirror">左右反転</label>
+        <label class="check"><input type="checkbox" id="bgRemove">背景を透過する（外周とつながった背景色を除去）</label>
+        <div class="row"><span>除去の幅</span><input type="range" id="bgTol" min="4" max="120" step="2"><output id="bgTolO"></output></div>
+      </div>
+
+      <div class="sec">
+        <h3>再生</h3>
+        <div class="row two"><span>1回の長さ</span>
+          <div class="seg" role="group" aria-label="再生秒数" id="secSeg">
+            <button type="button" data-sec="1">1秒</button><button type="button" data-sec="2">2秒</button><button type="button" data-sec="3">3秒</button><button type="button" data-sec="4">4秒</button>
+          </div></div>
+        <div class="row"><span>コマ数</span><input type="range" id="frames" min="5" max="20" step="1"><output id="framesO"></output></div>
+        <div class="row two"><span>ループ</span><select id="loops"></select></div>
+      </div>
+
+      <div class="sec">
+        <details class="spec">
+          <summary>LINEアニメーションスタンプの規格</summary>
+          <table class="spec-table">
+            <tr><td>スタンプ画像</td><td>APNG・最大 320×270px（本ツールは320×270で出力）</td></tr>
+            <tr><td>メイン画像</td><td>APNG・240×240px（★の付いたスタンプから生成）</td></tr>
+            <tr><td>タブ画像</td><td>PNG・96×74px（メインの1コマ目から生成）</td></tr>
+            <tr><td>コマ数</td><td>5〜20コマ。全コマ同じ絵だとエラー</td></tr>
+            <tr><td>再生時間</td><td>1・2・3・4秒のいずれか。秒数×ループ数は4秒以内</td></tr>
+            <tr><td>容量</td><td>1ファイル300KB以下（超えたら自動で減色して圧縮）</td></tr>
+            <tr><td>個数</td><td>8・16・24個のいずれかで申請</td></tr>
+            <tr><td>1コマ目</td><td>トーク一覧では1コマ目が静止画で出るため、伝えたい表情が出ている絵にする</td></tr>
+          </table>
+        </details>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/pako@1.0.11/dist/pako.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/upng-js@2.1.0/UPNG.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script>
+"use strict";
+const TAU = Math.PI * 2;
+const W = 320, H = 270, MARGIN = 10, MAX_BYTES = 300 * 1024;
+
+/* ---------- motion presets: p in [0,1) one cycle, A = strength ---------- */
+const MOTIONS = [
+  {id:"dance", name:"ノリノリ", sub:"左右にダンス", f:(p,A)=>({tx:10*A*Math.sin(TAU*p), ty:-9*A*Math.abs(Math.sin(TAU*p)), rot:7*A*Math.sin(TAU*p), bend:0.06*A*Math.sin(TAU*p+0.6)})},
+  {id:"step", name:"ステップ", sub:"向きを変えて", f:(p,A)=>{const h=p<0.5?p*2:(p-0.5)*2, b=Math.sin(Math.PI*h); return {flip:p<0.5?1:-1, ty:-12*A*b, sy:1+0.05*A*b-0.08*A*(1-b), sx:1-0.03*A*b+0.06*A*(1-b), rot:4*A*Math.sin(TAU*p)};}},
+  {id:"sway", name:"ゆらゆら", sub:"根元から揺れる", f:(p,A)=>({bend:0.13*A*Math.sin(TAU*p), rot:1.5*A*Math.sin(TAU*p)})},
+  {id:"jump", name:"ぴょん", sub:"ため→ジャンプ", f:(p,A)=>{
+    if(p<0.15){const s=Math.sin(Math.PI/2*p/0.15); return {sy:1-0.15*A*s, sx:1+0.12*A*s};}
+    if(p<0.65){const q=(p-0.15)/0.5, s=Math.sin(Math.PI*q); return {ty:-46*A*4*q*(1-q), sy:1-0.15*A*(1-q)*(q<0.2?1-q/0.2:0)+0.07*A*s, sx:1-0.04*A*s};}
+    if(p<0.82){const q=(p-0.65)/0.17, s=Math.sin(Math.PI*q); return {sy:1-0.17*A*s, sx:1+0.13*A*s};}
+    return {};
+  }},
+  {id:"poyon", name:"ぽよん", sub:"伸び縮み", f:(p,A)=>{const s=Math.sin(TAU*p); return {sy:1+0.1*A*s, sx:1-0.08*A*s};}},
+  {id:"jelly", name:"ぷるぷる", sub:"ゼリーのように", f:(p,A)=>({wave:0.07*A, wavePhase:p, sy:1+0.03*A*Math.sin(TAU*p*2)})},
+  {id:"float", name:"ふわふわ", sub:"浮かんで漂う", f:(p,A)=>({ty:-8*A*(0.5+0.5*Math.sin(TAU*p)), rot:3*A*Math.sin(TAU*p+1.2), pivot:"center"})},
+  {id:"bow", name:"おじぎ", sub:"ぺこり", f:(p,A)=>{const g=(1-Math.cos(TAU*p))/2; return {bend:0.2*A*g, sy:1-0.1*A*g, rot:3*A*g};}},
+  {id:"tilt", name:"はてな", sub:"首をかしげる", f:(p,A)=>{const g=(1-Math.cos(TAU*p))/2; return {rot:-12*A*g, bend:-0.04*A*g};}},
+  {id:"pulse", name:"ドキドキ", sub:"鼓動で拡大", f:(p,A)=>{const bump=(c,w)=>Math.exp(-Math.pow((p-c)/w,2)); const b=bump(0.12,0.07)+0.7*bump(0.32,0.07); return {sx:1+0.13*A*b, sy:1+0.13*A*b, pivot:"center"};}},
+  {id:"shake", name:"ブルブル", sub:"小刻みにふるえる", f:(p,A)=>({tx:3.2*A*Math.sin(TAU*p*4), rot:2.2*A*Math.sin(TAU*p*4+1.3)})},
+  {id:"surprise", name:"びっくり", sub:"とび上がる", f:(p,A)=>{
+    if(p<0.3){const q=p/0.3, s=Math.sin(Math.PI*q); return {ty:-20*A*s, sx:1-0.06*A*s, sy:1+0.12*A*s};}
+    const q=(p-0.3)/0.7, d=Math.exp(-q*4); return {tx:2.5*A*d*Math.sin(TAU*q*5), sy:1-0.05*A*d*Math.abs(Math.sin(TAU*q*2.5))};
+  }},
+  {id:"flip", name:"くるりん", sub:"横に回転", f:(p,A)=>({sx:Math.cos(TAU*p), pivot:"center", ty:-6*A*Math.abs(Math.sin(TAU*p))})},
+  {id:"spin", name:"ぐるぐる", sub:"一回転", f:(p,A)=>({rot:360*p, pivot:"center"})},
+  {id:"still", name:"止める", sub:"文字だけ動く", f:()=>({})},
+];
+const MOTION = Object.fromEntries(MOTIONS.map(m=>[m.id,m]));
+
+const TEXT_ANIMS = [
+  ["none","動かさない"],["poyon","ぽよん（拡大縮小）"],["wave","ぴょこぴょこ（1文字ずつ跳ねる）"],["sway","ゆらゆら（傾く）"],
+  ["shake","ブルブル"],["follow","キャラと一緒に動く"],["type","1文字ずつ出る"],
+];
+const FONTS = [
+  ["Yomogi","手書き（よもぎ）"],["Hachi Maru Pop","丸文字（はちまる）"],["Mochiy Pop One","ポップ（もちぃ）"],
+  ["Zen Maru Gothic","太丸ゴシック"],["Dela Gothic One","極太ゴシック"],["Klee One","ペン字（クレー）"],
+];
+const FONT_WEIGHT = {"Zen Maru Gothic":"900","Klee One":"600"};
+
+function defaults(){
+  return {motion:"dance", strength:1, cycles:2, boil:false,
+    text:"", font:"Yomogi", pos:"top", fontSize:40, textAnim:"poyon", fill:"#222222", stroke:"#ffffff", strokeW:6,
+    scale:1, offX:0, offY:0, mirror:false, bgRemove:true, bgTol:40,
+    sec:2, frames:20, loops:2};
+}
+
+/* ---------- state ---------- */
+const state = {stamps:[], sel:0, main:0, sample:true, playing:true, bg:"check"};
+let uid = 1;
+
+/* ---------- image processing: background removal + trim ---------- */
+function processImage(st){
+  const img = st.img;
+  let w = img.naturalWidth || img.width, h = img.naturalHeight || img.height;
+  const k = Math.min(1, 900 / Math.max(w, h));
+  w = Math.max(1, Math.round(w*k)); h = Math.max(1, Math.round(h*k));
+  const c = document.createElement("canvas"); c.width = w; c.height = h;
+  const x = c.getContext("2d", {willReadFrequently:true});
+  x.drawImage(img, 0, 0, w, h);
+  const id = x.getImageData(0, 0, w, h), d = id.data;
+  if (st.s.bgRemove) {
+    // background color = most common opaque border color sample
+    const corners = [[0,0],[w-1,0],[0,h-1],[w-1,h-1]].map(([cx,cy])=>(cy*w+cx)*4).filter(i=>d[i+3]>200);
+    if (corners.length) {
+      const i0 = corners[0], br=d[i0], bgc=d[i0+1], bb=d[i0+2];
+      const tol = st.s.bgTol, tol2 = tol*tol*3;
+      const seen = new Uint8Array(w*h), stack = [];
+      const near = p => { const i=p*4; if (d[i+3]<10) return true; const dr=d[i]-br, dg=d[i+1]-bgc, db=d[i+2]-bb; return dr*dr+dg*dg+db*db <= tol2; };
+      for (let X=0; X<w; X++){ stack.push(X, (h-1)*w+X); }
+      for (let Y=0; Y<h; Y++){ stack.push(Y*w, Y*w+w-1); }
+      while (stack.length) {
+        const p = stack.pop(); if (seen[p]) continue; seen[p]=1;
+        if (!near(p)) continue;
+        d[p*4+3] = 0;
+        const X = p % w, Y = (p / w) | 0;
+        if (X>0) stack.push(p-1); if (X<w-1) stack.push(p+1); if (Y>0) stack.push(p-w); if (Y<h-1) stack.push(p+w);
+      }
+      // soften: partially transparent pixels next to removed area that are close-ish to bg
+      for (let p=0; p<w*h; p++) {
+        if (d[p*4+3]===0) continue;
+        const X=p%w, Y=(p/w)|0;
+        const nb = (X>0&&d[(p-1)*4+3]===0)||(X<w-1&&d[(p+1)*4+3]===0)||(Y>0&&d[(p-w)*4+3]===0)||(Y<h-1&&d[(p+w)*4+3]===0);
+        if (!nb) continue;
+        const i=p*4, dr=d[i]-br, dg=d[i+1]-bgc, db=d[i+2]-bb, dist=Math.sqrt((dr*dr+dg*dg+db*db)/3);
+        if (dist < tol*2) d[i+3] = Math.min(d[i+3], Math.round(255*Math.max(0.35, dist/(tol*2))));
+      }
+    }
+  }
+  // trim to opaque bounds
+  let minX=w, minY=h, maxX=-1, maxY=-1;
+  for (let Y=0; Y<h; Y++) for (let X=0; X<w; X++) if (d[(Y*w+X)*4+3]>8){ if(X<minX)minX=X; if(X>maxX)maxX=X; if(Y<minY)minY=Y; if(Y>maxY)maxY=Y; }
+  if (maxX<0){ minX=0; minY=0; maxX=w-1; maxY=h-1; }
+  x.putImageData(id, 0, 0);
+  const tw = maxX-minX+1, th = maxY-minY+1;
+  const out = document.createElement("canvas"); out.width = tw; out.height = th;
+  out.getContext("2d").drawImage(c, minX, minY, tw, th, 0, 0, tw, th);
+  st.src = out;
+}
+
+/* ---------- rendering ---------- */
+function boilOffset(y, seed, amp){ return amp*(0.6*Math.sin(y*0.085+seed*2.13)+0.4*Math.sin(y*0.21+seed*5.31)); }
+
+function textMetrics(ctx, s, size){
+  ctx.font = `${FONT_WEIGHT[s.font]||"400"} ${size}px "${s.font}", "M PLUS Rounded 1c", sans-serif`;
+  const chars = [...s.text];
+  const ws = chars.map(ch => ctx.measureText(ch).width);
+  return {chars, ws, total: ws.reduce((a,b)=>a+b,0)};
+}
+
+// draws one frame of stamp st at time t (0..1 over one play) into ctx sized cw x ch (logical)
+function renderFrame(ctx, st, t, cw, ch, frameIndex){
+  const s = st.s;
+  ctx.clearRect(0, 0, cw, ch);
+  const u = Math.min(cw/W, ch/H);           // unit scale relative to 320x270 design
+  const fi = frameIndex == null ? Math.floor(t*s.frames) : frameIndex;
+  const p = ((t * s.cycles) % 1 + 1) % 1;
+  const m = Object.assign({tx:0,ty:0,rot:0,sx:1,sy:1,bend:0,wave:0,wavePhase:0,flip:1,pivot:"bottom"}, MOTION[s.motion].f(p, s.strength));
+  const boil = s.boil ? 1.4*u : 0;
+
+  // text block
+  const hasText = s.text.trim().length > 0;
+  let fsize = s.fontSize * u, tm = null;
+  if (hasText) {
+    tm = textMetrics(ctx, s, fsize);
+    const maxW = cw - 2*MARGIN*u - s.strokeW*u*2;
+    if (tm.total > maxW) { fsize *= maxW / tm.total; tm = textMetrics(ctx, s, fsize); }
+  }
+  const textH = hasText && s.pos !== "over" ? fsize*1.18 + 4*u : 0;
+
+  // character box
+  const m0 = MARGIN*u;
+  let bx = m0, by = m0, bw = cw - 2*m0, bh = ch - 2*m0;
+  if (s.pos === "top") { by += textH; bh -= textH; }
+  if (s.pos === "bottom") { bh -= textH; }
+  // leave headroom for upward motion
+  const src = st.src;
+  if (src) {
+    const fit = Math.min(bw / src.width, bh / src.height) * s.scale;
+    const dw = src.width * fit, dh = src.height * fit;
+    const baseX = bx + bw/2 + s.offX*u, baseY = by + bh - (bh - dh)/2*0 + s.offY*u; // bottom-aligned
+    const bottomY = Math.min(baseY, by + bh + s.offY*u);
+    const pivotY = m.pivot === "center" ? bottomY - dh/2 : bottomY;
+    ctx.save();
+    ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = "high";
+    ctx.translate(baseX + m.tx*u, pivotY + m.ty*u);
+    ctx.rotate(m.rot * Math.PI/180);
+    ctx.scale(m.sx * m.flip * (s.mirror?-1:1), m.sy);
+    const top = m.pivot === "center" ? -dh/2 : -dh;
+    const needStrips = m.bend !== 0 || m.wave !== 0 || boil > 0;
+    if (!needStrips) {
+      ctx.drawImage(src, -dw/2, top, dw, dh);
+    } else {
+      const stripH = Math.max(1, Math.round(2*u));
+      const n = Math.ceil(dh / stripH);
+      const seed = fi % 3;
+      for (let i = 0; i < n; i++) {
+        const y0 = i*stripH, hh = Math.min(stripH, dh - y0) + 0.6; // slight overlap hides seams
+        const yn = 1 - (y0 + stripH/2) / dh;             // 0 bottom .. 1 top
+        const off = m.bend * dw * Math.pow(Math.max(0,yn), 1.6) + boilOffset(y0/u, seed, boil);
+        const sxs = 1 + m.wave * Math.sin(TAU*(yn*1.1 - m.wavePhase*2));
+        const sy0 = y0 / dh * src.height, sh = Math.min(src.height - sy0, hh / dh * src.height);
+        if (sh <= 0) continue;
+        ctx.drawImage(src, 0, sy0, src.width, sh, -dw*sxs/2 + off, top + y0, dw*sxs, hh);
+      }
+    }
+    ctx.restore();
+  }
+
+  // text
+  if (hasText) {
+    const sw = s.strokeW * u * (fsize / (s.fontSize*u));
+    let ty;
+    if (s.pos === "top") ty = m0 + fsize*0.55 + 2*u;
+    else if (s.pos === "bottom") ty = ch - m0 - fsize*0.6;
+    else ty = ch*0.5;
+    const cx = cw/2;
+    let gScale = 1, gRot = 0, gx = 0, gy = 0;
+    const ta = s.textAnim;
+    const tp = ((t * Math.max(1, s.cycles)) % 1);
+    if (ta === "poyon") gScale = 1 + 0.08*Math.sin(TAU*tp);
+    if (ta === "sway") gRot = 6*Math.sin(TAU*tp);
+    if (ta === "shake") { gx = 2*u*Math.sin(TAU*tp*4); gRot = 1.5*Math.sin(TAU*tp*4+1); }
+    if (ta === "follow") { gx = m.tx*u*0.6; gy = m.ty*u*0.6; gRot = m.rot*0.4; }
+    let visible = tm.chars.length;
+    if (ta === "type") visible = Math.max(1, Math.min(tm.chars.length, Math.ceil(tm.chars.length * Math.min(1, t/0.6))));
+    ctx.save();
+    ctx.translate(cx + gx, ty + gy);
+    ctx.rotate(gRot*Math.PI/180);
+    ctx.scale(gScale, gScale);
+    ctx.textBaseline = "middle"; ctx.textAlign = "left";
+    ctx.lineJoin = "round"; ctx.miterLimit = 2;
+    let x = -tm.total/2;
+    const seed = fi % 3;
+    for (let pass = 0; pass < 2; pass++) {
+      x = -tm.total/2;
+      for (let i = 0; i < tm.chars.length; i++) {
+        if (i < visible) {
+          let cy = 0;
+          if (ta === "wave") cy = -fsize*0.16*Math.max(0, Math.sin(TAU*(tp - i/Math.max(4,tm.chars.length))));
+          const jx = s.boil ? boilOffset(i*37, seed, 0.9*u) : 0, jy = s.boil ? boilOffset(i*53+11, seed+1, 0.9*u) : 0;
+          if (pass === 0 && sw > 0) { ctx.strokeStyle = s.stroke; ctx.lineWidth = sw*2; ctx.strokeText(tm.chars[i], x + jx, cy + jy); }
+          if (pass === 1) { ctx.fillStyle = s.fill; ctx.fillText(tm.chars[i], x + jx, cy + jy); }
+        }
+        x += tm.ws[i];
+      }
+    }
+    ctx.restore();
+  }
+}
+
+/* ---------- APNG encode ---------- */
+function frameDelays(sec, n){ const total = sec*1000, base = Math.floor(total/n); const r = total - base*n; return Array.from({length:n}, (_,i)=> base + (i < r ? 1 : 0)); }
+
+function setLoops(buf, loops){
+  const d = new Uint8Array(buf);
+  for (let i = 8; i < d.length - 12; ) {
+    const len = (d[i]<<24|d[i+1]<<16|d[i+2]<<8|d[i+3])>>>0;
+    const type = String.fromCharCode(d[i+4],d[i+5],d[i+6],d[i+7]);
+    if (type === "acTL") {
+      const o = i+12; d[o]=(loops>>>24)&255; d[o+1]=(loops>>>16)&255; d[o+2]=(loops>>>8)&255; d[o+3]=loops&255;
+      const crc = UPNG.crc.crc(d, i+4, 4+len) >>> 0;
+      const c = i+8+len; d[c]=(crc>>>24)&255; d[c+1]=(crc>>>16)&255; d[c+2]=(crc>>>8)&255; d[c+3]=crc&255;
+      break;
+    }
+    if (type === "IDAT") break;
+    i += 12 + len;
+  }
+  return buf;
+}
+
+function renderFrames(st, cw, ch){
+  const c = document.createElement("canvas"); c.width = cw; c.height = ch;
+  const x = c.getContext("2d", {willReadFrequently:true});
+  const bufs = [];
+  for (let i = 0; i < st.s.frames; i++) {
+    renderFrame(x, st, i / st.s.frames, cw, ch, i);
+    bufs.push(x.getImageData(0, 0, cw, ch).data.buffer.slice(0));
+  }
+  return bufs;
+}
+
+function allSame(bufs){
+  const a = new Uint8Array(bufs[0]);
+  return bufs.every(b => { const v = new Uint8Array(b); for (let i=0;i<v.length;i+=97) if (v[i]!==a[i]) return false; return true; });
+}
+
+// encode with automatic color reduction to stay under 300KB
+function encodeAPNG(st, cw, ch){
+  if (!window.UPNG || !window.pako) throw new Error("書き出しライブラリを読み込めませんでした。ネット接続を確認して再読み込みしてください。");
+  const bufs = renderFrames(st, cw, ch);
+  if (allSame(bufs)) throw new Error("全コマが同じ絵です。動きか文字の動きを選んでください（LINEの審査でエラーになります）。");
+  const dels = frameDelays(st.s.sec, st.s.frames);
+  let out, used = 0;
+  for (const cnum of [0, 256, 128, 64, 32]) {
+    out = UPNG.encode(bufs, cw, ch, cnum, dels);
+    used = cnum;
+    if (out.byteLength <= MAX_BYTES) break;
+  }
+  setLoops(out, st.s.loops);
+  return {buf: out, bytes: out.byteLength, colors: used};
+}
+
+function encodeStill(st, cw, ch){
+  const c = document.createElement("canvas"); c.width = cw; c.height = ch;
+  renderFrame(c.getContext("2d"), st, 0, cw, ch, 0);
+  return new Promise(r => c.toBlob(r, "image/png"));
+}
+
+/* ---------- saving ---------- */
+const dlReady = (window.claude && window.claude.use) ? window.claude.use("downloads").catch(()=>null) : Promise.resolve(null);
+async function saveBlob(name, blob){
+  const dl = await dlReady;
+  if (dl) {
+    try { await dl.save({filename:name, data:blob}); return "saved"; }
+    catch (e) { if (e && e.code === "declined") return "declined"; if (e && e.code === "rate_limited") return "busy"; }
+  }
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
+  return "saved";
+}
+
+/* ---------- sample character (original, drawn on canvas) ---------- */
+function drawSample(pose){
+  const c = document.createElement("canvas"); c.width = 400; c.height = 400;
+  const x = c.getContext("2d");
+  x.lineJoin = "round"; x.lineCap = "round";
+  const body = () => {
+    x.beginPath();
+    x.moveTo(200, 70);
+    x.bezierCurveTo(300, 70, 335, 160, 330, 250);
+    x.bezierCurveTo(326, 320, 300, 352, 245, 356);
+    x.lineTo(155, 356);
+    x.bezierCurveTo(100, 352, 74, 320, 70, 250);
+    x.bezierCurveTo(65, 160, 100, 70, 200, 70);
+    x.closePath();
+  };
+  const arm = (sx, sy, ex, ey) => { x.beginPath(); x.moveTo(sx, sy); x.quadraticCurveTo((sx+ex)/2+(ex>sx?-6:6), (sy+ey)/2-12, ex, ey); };
+  const arms = {up:[[80,215,40,140],[320,215,360,140]], wave:[[80,240,50,290],[320,210,365,140]], down:[[78,250,48,300],[322,250,352,300]]}[pose];
+  // outline pass
+  x.strokeStyle = "#1b1b1b"; x.lineWidth = 34;
+  arms.forEach(a => { arm(...a); x.stroke(); });
+  body(); x.lineWidth = 14; x.stroke();
+  // feet
+  x.fillStyle = "#1b1b1b"; [[160,358],[240,358]].forEach(([fx,fy])=>{ x.beginPath(); x.ellipse(fx, fy, 24, 13, 0, 0, TAU); x.fill(); });
+  // white fill
+  x.strokeStyle = "#ffffff"; x.lineWidth = 20; arms.forEach(a => { arm(...a); x.stroke(); });
+  x.fillStyle = "#ffffff"; body(); x.fill();
+  x.fillStyle = "#ffffff"; [[160,356],[240,356]].forEach(([fx,fy])=>{ x.beginPath(); x.ellipse(fx, fy, 15, 6, 0, 0, TAU); x.fill(); });
+  // face
+  x.fillStyle = "#1b1b1b";
+  if (pose === "wave") { x.lineWidth = 7; x.strokeStyle = "#1b1b1b"; [[160,180],[240,180]].forEach(([ex,ey])=>{ x.beginPath(); x.arc(ex, ey+6, 12, Math.PI*1.1, Math.PI*1.9); x.stroke(); }); }
+  else [[162,178],[238,178]].forEach(([ex,ey])=>{ x.beginPath(); x.ellipse(ex, ey, 8, 10, 0, 0, TAU); x.fill(); });
+  x.fillStyle = "rgba(255,120,130,.55)"; [[135,212],[265,212]].forEach(([bx,by])=>{ x.beginPath(); x.ellipse(bx, by, 17, 10, 0, 0, TAU); x.fill(); });
+  x.strokeStyle = "#1b1b1b"; x.lineWidth = 6;
+  x.beginPath();
+  if (pose === "down") { x.moveTo(186, 214); x.quadraticCurveTo(200, 206, 214, 214); }
+  else { x.moveTo(184, 206); x.quadraticCurveTo(192, 220, 200, 208); x.quadraticCurveTo(208, 220, 216, 206); }
+  x.stroke();
+  return c;
+}
+
+function addSampleStamps(){
+  const mk = (pose, text, motion, extra) => {
+    const st = {id:uid++, name:"sample", s:Object.assign(defaults(), {text, motion, bgRemove:false}, extra)};
+    st.src = (()=>{ const c = drawSample(pose); st.img = c; return null; })();
+    processImage(st);
+    return st;
+  };
+  state.stamps = [
+    mk("up", "おはよ〜", "dance", {}),
+    mk("wave", "ありがと〜", "sway", {textAnim:"wave"}),
+    mk("up", "ファイト〜", "jump", {font:"Mochiy Pop One", fontSize:36, cycles:2, textAnim:"poyon"}),
+    mk("down", "ホントに？", "tilt", {cycles:1, textAnim:"sway"}),
+    mk("down", "よろしく", "bow", {cycles:2, textAnim:"none", font:"Hachi Maru Pop"}),
+    mk("up", "やったー！", "step", {boil:true, textAnim:"wave", font:"Dela Gothic One", fontSize:34, fill:"#e2533b"}),
+  ];
+  state.sel = 0; state.main = 0; state.sample = true;
+}
+
+/* ---------- UI wiring ---------- */
+const $ = id => document.getElementById(id);
+const cur = () => state.stamps[state.sel];
+
+function buildStatic(){
+  $("motionChips").innerHTML = MOTIONS.map(m => `<button type="button" class="chip" data-motion="${m.id}" aria-pressed="false">${m.name}<span>${m.sub}</span></button>`).join("");
+  $("font").innerHTML = FONTS.map(([v,l]) => `<option value="${v}">${l}</option>`).join("");
+  $("textAnim").innerHTML = TEXT_ANIMS.map(([v,l]) => `<option value="${v}">${l}</option>`).join("");
+}
+
+function renderTiles(){
+  const t = $("tiles");
+  t.innerHTML = "";
+  state.stamps.forEach((st, i) => {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "tile" + (i === state.sel ? " sel" : "");
+    b.setAttribute("aria-label", `スタンプ ${i+1}${st.s.text ? "「"+st.s.text+"」" : ""}`);
+    const c = document.createElement("canvas"); c.width = 160; c.height = 135; st.thumb = c;
+    b.innerHTML = `<span class="no">${String(i+1).padStart(2,"0")}</span>${i===state.main?'<span class="star" title="メイン画像">★</span>':""}`;
+    b.prepend(c);
+    b.onclick = () => { state.sel = i; renderTiles(); syncInspector(); setSize(null); };
+    t.appendChild(b);
+  });
+  const add = document.createElement("label");
+  add.className = "tile add"; add.htmlFor = "fileIn"; add.innerHTML = "<b>＋</b>PNGを追加";
+  t.appendChild(add);
+  const n = state.stamps.length;
+  const target = n <= 8 ? 8 : n <= 16 ? 16 : 24;
+  const pill = $("countPill");
+  pill.textContent = `${n} / ${target}`;
+  pill.className = "pill " + ([8,16,24].includes(n) ? "ok" : n > 24 ? "bad" : "warn");
+  pill.title = "LINEは8・16・24個で申請";
+  $("sampleNote").hidden = !state.sample;
+}
+
+function syncInspector(){
+  const st = cur(); if (!st) return;
+  const s = st.s;
+  document.querySelectorAll("#motionChips .chip").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.motion === s.motion)));
+  for (const k of ["strength","cycles","fontSize","strokeW","scale","offX","offY","bgTol","frames"]) { $(k).value = s[k]; }
+  $("text").value = s.text; $("font").value = s.font; $("textAnim").value = s.textAnim;
+  $("fill").value = s.fill; $("stroke").value = s.stroke;
+  $("boil").checked = s.boil; $("mirror").checked = s.mirror; $("bgRemove").checked = s.bgRemove;
+  document.querySelectorAll("#posSeg button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.pos === s.pos)));
+  document.querySelectorAll("#secSeg button").forEach(b => b.setAttribute("aria-pressed", String(+b.dataset.sec === s.sec)));
+  const maxLoops = Math.max(1, Math.floor(4 / s.sec));
+  if (s.loops > maxLoops) s.loops = maxLoops;
+  $("loops").innerHTML = Array.from({length:maxLoops}, (_,i)=>`<option value="${i+1}">${i+1}回（合計${(i+1)*s.sec}秒）</option>`).join("");
+  $("loops").value = s.loops;
+  $("bgRemove").disabled = state.sample; $("bgTol").disabled = state.sample || !s.bgRemove;
+  updateOutputs();
+}
+
+function updateOutputs(){
+  const s = cur().s;
+  $("strengthO").textContent = s.strength.toFixed(1);
+  $("cyclesO").textContent = s.cycles + "回";
+  $("fontSizeO").textContent = s.fontSize + "px";
+  $("strokeWO").textContent = s.strokeW + "px";
+  $("scaleO").textContent = Math.round(s.scale*100) + "%";
+  $("offXO").textContent = s.offX; $("offYO").textContent = s.offY;
+  $("bgTolO").textContent = s.bgTol;
+  $("framesO").textContent = s.frames + "コマ";
+  const d = frameDelays(s.sec, s.frames);
+  const fps = (s.frames / s.sec).toFixed(1);
+  $("specLine").textContent = `${W}×${H}px ・ ${s.frames}コマ（${d[0]}ms/コマ, ${fps}fps）・ ${s.sec}秒 × ${s.loops}ループ = ${s.sec*s.loops}秒`;
+  const tl = $("timeline");
+  if (tl.children.length !== s.frames) tl.innerHTML = "<i></i>".repeat(s.frames);
+}
+
+function setSize(r){
+  const p = $("sizePill");
+  if (!r) { p.textContent = "容量 未計測"; p.className = "pill"; return; }
+  const kb = (r.bytes/1024).toFixed(1);
+  p.textContent = `${kb}KB${r.colors ? `（${r.colors}色に圧縮）` : "（無劣化）"}`;
+  p.className = "pill " + (r.bytes <= MAX_BYTES ? "ok" : "bad");
+}
+
+function msg(text, kind){ const m = $("msg"); m.textContent = text; m.className = "msg " + (kind||""); }
+
+const reprocessKeys = new Set(["bgRemove","bgTol"]);
+function setVal(key, val){
+  const st = cur(); if (!st) return;
+  st.s[key] = val;
+  if (reprocessKeys.has(key) && st.img) processImage(st);
+  if (key === "sec") syncInspector(); else updateOutputs();
+  if (key === "bgRemove") $("bgTol").disabled = !val;
+  if (key === "font" || key === "text") ensureFont(st.s);
+  setSize(null);
+}
+
+function ensureFont(s){
+  if (!document.fonts || !s.text) return;
+  document.fonts.load(`${FONT_WEIGHT[s.font]||"400"} 40px "${s.font}"`, s.text).catch(()=>{});
+}
+
+function wire(){
+  $("motionChips").addEventListener("click", e => {
+    const b = e.target.closest(".chip"); if (!b) return;
+    setVal("motion", b.dataset.motion);
+    document.querySelectorAll("#motionChips .chip").forEach(c => c.setAttribute("aria-pressed", String(c === b)));
+  });
+  const nums = {strength:parseFloat, cycles:parseInt, fontSize:parseInt, strokeW:parseInt, scale:parseFloat, offX:parseInt, offY:parseInt, bgTol:parseInt, frames:parseInt};
+  for (const [k, fn] of Object.entries(nums)) $(k).addEventListener("input", e => setVal(k, fn(e.target.value)));
+  $("text").addEventListener("input", e => setVal("text", e.target.value));
+  $("font").addEventListener("change", e => setVal("font", e.target.value));
+  $("textAnim").addEventListener("change", e => setVal("textAnim", e.target.value));
+  $("fill").addEventListener("input", e => setVal("fill", e.target.value));
+  $("stroke").addEventListener("input", e => setVal("stroke", e.target.value));
+  $("loops").addEventListener("change", e => setVal("loops", parseInt(e.target.value)));
+  for (const k of ["boil","mirror","bgRemove"]) $(k).addEventListener("change", e => setVal(k, e.target.checked));
+  $("posSeg").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; setVal("pos", b.dataset.pos); document.querySelectorAll("#posSeg button").forEach(x => x.setAttribute("aria-pressed", String(x===b))); });
+  $("secSeg").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; setVal("sec", +b.dataset.sec); });
+  document.querySelectorAll("[data-bg]").forEach(b => b.addEventListener("click", () => {
+    state.bg = b.dataset.bg; $("stage").className = "stage bg-" + state.bg;
+    document.querySelectorAll("[data-bg]").forEach(x => x.setAttribute("aria-pressed", String(x===b)));
+  }));
+  $("guideChk").addEventListener("change", e => { $("guide").hidden = !e.target.checked; });
+  $("playBtn").addEventListener("click", () => { state.playing = !state.playing; $("playBtn").textContent = state.playing ? "一時停止" : "再生"; });
+
+  $("fileIn").addEventListener("change", async e => {
+    const files = [...e.target.files]; e.target.value = "";
+    if (!files.length) return;
+    if (state.sample) { state.stamps = []; state.sample = false; state.main = 0; }
+    const base = state.stamps.length ? Object.assign({}, cur().s) : defaults();
+    const loaded = [];
+    for (const f of files.sort((a,b)=>a.name.localeCompare(b.name, "ja", {numeric:true}))) {
+      if (state.stamps.length + loaded.length >= 40) break;
+      try {
+        const img = await loadImage(f);
+        const st = {id:uid++, name:f.name.replace(/\.[^.]+$/,""), img, s:Object.assign({}, base, {text:"", offX:0, offY:0, scale:1, mirror:false})};
+        // auto: keep transparency if file already has it
+        st.s.bgRemove = !hasTransparency(img);
+        processImage(st);
+        loaded.push(st);
+      } catch (err) { msg(`${f.name} を読み込めませんでした`, "bad"); }
+    }
+    state.stamps.push(...loaded);
+    state.sel = Math.max(0, state.stamps.length - loaded.length);
+    renderTiles(); syncInspector(); setSize(null);
+    if (loaded.length) msg(`${loaded.length}枚を追加しました。タイルを選んで動きと文字を設定してください。`, "ok");
+  });
+
+  $("mainBtn").addEventListener("click", () => { state.main = state.sel; renderTiles(); msg("メイン画像（240×240）とタブ画像（96×74）はこのスタンプから作ります。", "ok"); });
+  $("dupBtn").addEventListener("click", () => {
+    const st = cur(); if (!st || state.stamps.length >= 40) return;
+    const cp = {id:uid++, name:st.name, img:st.img, src:st.src, s:Object.assign({}, st.s)};
+    state.stamps.splice(state.sel+1, 0, cp); state.sel++; renderTiles(); syncInspector();
+  });
+  $("delBtn").addEventListener("click", () => {
+    if (state.stamps.length <= 1) { msg("最後の1つは削除できません。先に別の素材を追加してください。", "bad"); return; }
+    state.stamps.splice(state.sel, 1);
+    if (state.main === state.sel) state.main = 0; else if (state.main > state.sel) state.main--;
+    state.sel = Math.min(state.sel, state.stamps.length-1); renderTiles(); syncInspector(); setSize(null);
+  });
+  $("applyAllBtn").addEventListener("click", () => {
+    const s = cur().s, keys = ["motion","strength","cycles","boil","sec","frames","loops","textAnim","font","fontSize","fill","stroke","strokeW","pos"];
+    state.stamps.forEach(st => keys.forEach(k => st.s[k] = s[k]));
+    msg("動き・文字の見た目・再生設定を全スタンプにそろえました（文字の内容と配置はそのまま）。", "ok");
+  });
+  $("omakaseBtn").addEventListener("click", () => {
+    const order = ["dance","jump","sway","poyon","step","jelly","float","tilt","bow","surprise","pulse","shake","flip"];
+    state.stamps.forEach((st, i) => { st.s.motion = order[i % order.length]; });
+    syncInspector(); msg("スタンプごとに違う動きを割り振りました。気になるものは個別に変えてください。", "ok");
+  });
+
+  $("checkBtn").addEventListener("click", () => {
+    try { const r = encodeAPNG(cur(), W, H); setSize(r); msg(r.bytes <= MAX_BYTES ? "300KB以内に収まっています。" : "300KBを超えています。コマ数を減らすか素材を小さくしてください。", r.bytes <= MAX_BYTES ? "ok" : "bad"); }
+    catch (e) { msg(e.message, "bad"); }
+  });
+  $("saveOneBtn").addEventListener("click", async () => {
+    try {
+      const r = encodeAPNG(cur(), W, H); setSize(r);
+      const name = String(state.sel+1).padStart(2,"0") + ".png";
+      const res = await saveBlob(name, new Blob([r.buf], {type:"image/png"}));
+      msg(res === "saved" ? `${name} を保存しました（${(r.bytes/1024).toFixed(1)}KB）` : res === "declined" ? "保存をキャンセルしました" : "保存の確認画面が開いています", res === "saved" ? "ok" : "");
+    } catch (e) { msg(e.message, "bad"); }
+  });
+  $("zipBtn").addEventListener("click", exportZip);
+}
+
+async function exportZip(){
+  if (!window.JSZip) { msg("ZIPライブラリを読み込めませんでした。再読み込みしてください。", "bad"); return; }
+  const btn = $("zipBtn"); btn.disabled = true;
+  const prog = $("prog"), bar = prog.firstElementChild; prog.hidden = false;
+  const zip = new JSZip(), over = [];
+  try {
+    const n = state.stamps.length;
+    for (let i = 0; i < n; i++) {
+      bar.style.width = `${(i/(n+2))*100}%`;
+      await new Promise(r => setTimeout(r, 0));
+      const r = encodeAPNG(state.stamps[i], W, H);
+      if (r.bytes > MAX_BYTES) over.push(i+1);
+      zip.file(String(i+1).padStart(2,"0") + ".png", r.buf);
+    }
+    const mainSt = state.stamps[state.main] || state.stamps[0];
+    const mainR = encodeAPNG(mainSt, 240, 240);
+    zip.file("main.png", mainR.buf);
+    bar.style.width = `${((n+1)/(n+2))*100}%`;
+    const tabSt = Object.assign({}, mainSt, {s:Object.assign({}, mainSt.s, {boil:false})});
+    zip.file("tab.png", await encodeStill(tabSt, 96, 74));
+    const blob = await zip.generateAsync({type:"blob"});
+    bar.style.width = "100%";
+    const res = await saveBlob("line_animation_stamps.zip", blob);
+    const cnt = [8,16,24].includes(n) ? "" : `（申請は8・16・24個。いまは${n}個です）`;
+    if (over.length) msg(`保存しました。ただし ${over.join("、")} 番が300KBを超えています。コマ数を減らしてください。${cnt}`, "bad");
+    else msg(res === "saved" ? `ZIPを保存しました：01〜${String(n).padStart(2,"0")}.png・main.png・tab.png ${cnt}` : "保存をキャンセルしました", res === "saved" ? "ok" : "");
+  } catch (e) { msg(e.message, "bad"); }
+  finally { btn.disabled = false; setTimeout(()=>{ prog.hidden = true; bar.style.width = "0"; }, 800); }
+}
+
+function loadImage(file){
+  return new Promise((res, rej) => { const img = new Image(); img.onload = () => res(img); img.onerror = rej; img.src = URL.createObjectURL(file); });
+}
+function hasTransparency(img){
+  const c = document.createElement("canvas"); const w = Math.min(200, img.naturalWidth), h = Math.min(200, img.naturalHeight);
+  c.width = w; c.height = h; const x = c.getContext("2d"); x.drawImage(img, 0, 0, w, h);
+  const d = x.getImageData(0, 0, w, h).data;
+  for (let i = 3; i < d.length; i += 4*7) if (d[i] < 250) return true;
+  return false;
+}
+
+/* ---------- animation loop ---------- */
+let lastFrame = -1, t0 = performance.now(), pausedT = 0;
+function loop(now){
+  const st = cur();
+  if (st) {
+    const s = st.s, dur = s.sec*1000;
+    if (!state.playing) t0 = now - pausedT; else pausedT = now - t0;
+    const tt = ((now - t0) % dur) / dur;
+    const fi = Math.floor(tt * s.frames);
+    const key = fi + ":" + JSON.stringify(s) + state.sel;
+    if (key !== lastFrame) {
+      lastFrame = key;
+      const cv = $("stageCv"), x = cv.getContext("2d");
+      x.setTransform(1,0,0,1,0,0);
+      renderFrame(x, st, fi / s.frames, cv.width, cv.height, fi);
+      const tl = $("timeline").children;
+      for (let i = 0; i < tl.length; i++) tl[i].classList.toggle("on", i === fi);
+      // thumbnails (each with its own timing)
+      state.stamps.forEach(o => {
+        if (!o.thumb) return;
+        const od = o.s.sec*1000, ot = ((now - t0) % od)/od, of = Math.floor(ot*o.s.frames);
+        renderFrame(o.thumb.getContext("2d"), o, of/o.s.frames, o.thumb.width, o.thumb.height, of);
+      });
+    }
+  }
+  requestAnimationFrame(loop);
+}
+
+/* ---------- boot ---------- */
+buildStatic();
+addSampleStamps();
+renderTiles();
+syncInspector();
+wire();
+state.stamps.forEach(st => ensureFont(st.s));
+if (document.fonts) document.fonts.ready.then(() => { lastFrame = -1; });
+requestAnimationFrame(loop);
+</script>
+</body></html>
